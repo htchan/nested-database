@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemBottomSheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/background_dark"
+    android:orientation="vertical"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="64dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <EditText
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:hint="Table Name"
+        android:paddingLeft="10sp"
+        android:paddingTop="7sp"
+        android:paddingRight="10sp"
+        android:paddingBottom="7sp"
+        android:textColor="@android:color/background_light"
+        android:textColorHint="@android:color/background_light" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:ems="10"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="id"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:ems="10"
+            android:gravity="left"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="LONG"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:ems="10"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="title"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:ems="10"
+            android:gravity="left"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="TEXT"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:ems="10"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="parentTable"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:ems="10"
+            android:gravity="left"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="TEXT"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:ems="10"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="parentId"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:ems="10"
+            android:gravity="left"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:text="LONG"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:ems="10"
+            android:hint="Field Name"
+            android:inputType="textShortMessage|text"
+            android:paddingLeft="10sp"
+            android:paddingTop="7sp"
+            android:paddingRight="10sp"
+            android:paddingBottom="7sp"
+            android:textColor="@android:color/background_light"
+            android:textColorHint="@android:color/background_light"
+            android:textSize="14sp" />
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:entries="@array/field_type"
+            android:gravity="end"
+            android:spinnerMode="dropdown"
+            android:textAlignment="textEnd"
+            android:theme="@style/spinnerTheme" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@android:color/background_dark"
+        app:srcCompat="@android:drawable/ic_menu_add" />
+
+</LinearLayout>
