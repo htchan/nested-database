@@ -3,6 +3,11 @@ package com.htchan.marking.model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public abstract class AbstractItem {
     public static final String COL_ID = "id";
@@ -29,7 +34,33 @@ public abstract class AbstractItem {
 
     public long getId() {return id;}
     public String getTable() {return table;}
-
+    public static ArrayList<AbstractItem> getChildren(String table, long id) {
+        ArrayList<AbstractItem> children = new ArrayList<>();
+        //TODO extract the children by id
+        DatabaseHelper db = DatabaseHelper.DatabaseHelper();
+        Iterator<String> i = db.getTables().iterator();
+        while (i.hasNext()) {
+            String searchTable = i.next();
+            Log.i("table", searchTable);
+            Cursor cursor = db.getCursorByParent(searchTable, table, id);
+            if(cursor.moveToFirst()) {
+                do {
+                    long childId = cursor.getLong(cursor.getColumnIndex(AbstractItem.COL_ID));
+                    switch(searchTable) {
+                        case Item.TABLE_NAME:
+                            children.add(new Item(childId));
+                            break;
+                        case Task.TABLE_NAME:
+                            children.add(new Task(childId));
+                            break;
+                        default:
+                            children.add(new CustomizeItem(searchTable, childId));
+                    }
+                } while (cursor.moveToNext());
+            }
+        }
+        return children;
+    }
     public void fromCursor(Cursor cursor) {
         cursor.moveToFirst();
         id = cursor.getLong(cursor.getColumnIndex(COL_ID));

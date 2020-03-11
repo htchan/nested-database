@@ -16,15 +16,9 @@ public class ItemBottomSheet extends AbstractBottomSheetLayout<Item> {
     private EditText title;
     public ItemBottomSheet(Context context) {
         super(context);
-        id = -1;
         inflate(context, R.layout.item_bottom_sheet, this);
+        id = -1;
         title = findViewById(R.id.title);
-    }
-    public String getItemTitle() {
-        return title.getText().toString();
-    }
-    public void setItemTitle(String s) {
-        title.setText(s);
     }
     @Override
     public void clear() {
@@ -45,13 +39,12 @@ public class ItemBottomSheet extends AbstractBottomSheetLayout<Item> {
             return i;
         } else {
             Item i = new Item(id);
-            i.title = title.getText().toString();
+            i.title = title.getText().toString().trim();
             return i;
         }
     }
     @Override
     public boolean valid() {
-        Log.i("valid", Integer.toString(title.getText().toString().trim().length()));
         if(title.getText().toString().trim().length() > 0) {
             return true;
         } else {

@@ -52,9 +52,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         createTable(db, Item.TABLE_NAME,
-                    Arrays.asList(new String[] {Item.COL_ID, Item.COL_TITLE, Item.COL_PARENT_TABLE, Item.COL_PARENT_ID}),
-                    Arrays.asList(new String[] {"LONG", "TEXT", "LONG", "TEXT"}));
+                    Arrays.asList(Item.COL_ID, Item.COL_TITLE, Item.COL_PARENT_TABLE, Item.COL_PARENT_ID),
+                    Arrays.asList("LONG", "TEXT", "TEXT", "LONG"));
         ContentValues values = new Item("Main", Item.TABLE_NAME, -1).toValues();
+        createTable(db, Task.TABLE_NAME,
+                Arrays.asList(Task.COL_ID, Task.COL_TITLE, Task.COL_PARENT_TABLE, Task.COL_PARENT_ID, Task.COL_CHECKED, Task.COL_DETAILS),
+                Arrays.asList("LONG", "TEXT", "TEXT", "LONG", "INTEGER", "TEXT"));
         values.put(Item.COL_ID, 0);
         db.insert(Item.TABLE_NAME, null, values);
         //createTable(Task.CreateTableSql);
@@ -107,7 +110,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(table, "id=?", new String[] {Long.toString(id)});
     }
     public void deleteChild(String table, long id) {
-        //TODO delete all child with choosing item
         for(AbstractItem item : Item.getChildren(table, id)) {
             deleteChild(item.getTable(), item.getId());
         }

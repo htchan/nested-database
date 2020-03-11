@@ -1,11 +1,15 @@
 package com.htchan.marking.ui.bottomsheet;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.htchan.marking.MainActivity;
@@ -59,17 +63,21 @@ public class BottomSheet {
             @Override
             public void onClick(View view) {
                 //TODO add the value to the table
-                switch (mode) {
-                    case ADD:
-                        add();
-                        break;
-                    case SAVE:
-                        save();
-                        break;
+                if(layouts.get(tables.get(currentLayout)).valid()) {
+                    switch (mode) {
+                        case ADD:
+                            add();
+                            layouts.get(tables.get(currentLayout)).clear();
+                            break;
+                        case SAVE:
+                            save();
+                            MainActivity.mainActivity.hideKeyBoard();
+                            behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                            break;
+                    }
+                } else {
+                    Toast.makeText(context, "Invalid Item", Toast.LENGTH_LONG).show();
                 }
-                MainActivity.mainActivity.reloadItemsPanel();
-                MainActivity.mainActivity.hideKeyBoard();
-                behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
         });
         left.setOnClickListener(new View.OnClickListener() {
@@ -90,26 +98,19 @@ public class BottomSheet {
         });
     }
     private void add() {
-        if (!tables.get(currentLayout).equals("New Table")) {
-            if(layouts.get(tables.get(currentLayout)).valid()) {
-                layouts.get(tables.get(currentLayout)).toItem().save();
-                layouts.get(tables.get(currentLayout)).clear();
-                Toast.makeText(context, "Item added successfully", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(context, "Invalid Item", Toast.LENGTH_LONG).show();
-            }
+        if (! tables.get(currentLayout).equals("New Table")) {
+            layouts.get(tables.get(currentLayout)).toItem().save();
+            layouts.get(tables.get(currentLayout)).clear();
+            Toast.makeText(context, "Item added successfully", Toast.LENGTH_LONG).show();
+            MainActivity.mainActivity.reloadItemsPanel();
         } else {
-
+            //TODO aprocess user input to create new table (it not exist)
         }
     }
     private void save() {
-        if(layouts.get(tables.get(currentLayout)).valid()) {
-            layouts.get(tables.get(currentLayout)).toItem().update();
-            layouts.get(tables.get(currentLayout)).clear();
-            Toast.makeText(context, "Item updated successfully", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(context, "Invalid Item", Toast.LENGTH_LONG).show();
-        }
+        layouts.get(tables.get(currentLayout)).toItem().update();
+        layouts.get(tables.get(currentLayout)).clear();
+        Toast.makeText(context, "Item updated successfully", Toast.LENGTH_LONG).show();
         MainActivity.mainActivity.reloadItemsPanel();
     }
 
@@ -135,6 +136,7 @@ public class BottomSheet {
                 return;
         }
     }
+    public Mode getMode() {return mode;}
     public void setLayout(AbstractItem item) {
         currentLayout = tables.indexOf(item.getTable());
         layouts.get(tables.get(currentLayout)).setContent(item);
