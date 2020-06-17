@@ -6,10 +6,11 @@ import android.os.Bundle;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.htchan.marking.model.AbstractItem;
-import com.htchan.marking.model.DatabaseHelper;
-import com.htchan.marking.model.Item;
-import com.htchan.marking.model.Task;
+import com.htchan.marking.baseModel.AbstractItem;
+import com.htchan.marking.baseModel.CustomizeItem;
+import com.htchan.marking.baseModel.DatabaseHelper;
+import com.htchan.marking.baseModel.Item;
+import com.htchan.marking.baseModel.Task;
 import com.htchan.marking.ui.bottomsheet.BottomSheet;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,39 +18,41 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SearchView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import java.util.ArrayList;
 
 import static android.util.Log.i;
 
 public class MainActivity extends AppCompatActivity {
     public static MainActivity mainActivity;
+    public static Item MAIN_ITEM;
 
     private DatabaseHelper db;
+    private FloatingActionButton floatButton;
     private TextView heading, headingTable;
     private View headingDiv;
     private LinearLayout detailsPanel;
     private RecyclerView itemsPanel;
     private RecyclerView.Adapter itemAdapter;
     private LinearLayout searchBar;
+    private LinearLayout movingRow;
     private boolean backPressed;
+    private boolean movingConfirm;
     public AbstractItem parentItem;
     public BottomSheet bottomSheet;
+    public AbstractItem movingItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,17 +60,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         db = DatabaseHelper.DatabaseHelper(this);
         mainActivity = this;
+        MAIN_ITEM = new Item(0);
+        floatButton = findViewById(R.id.fab);
         heading = findViewById(R.id.heading);
+        heading.setMovementMethod(new ScrollingMovementMethod());
+        heading.requestFocus();
         headingTable = findViewById(R.id.headingTable);
         headingDiv = findViewById(R.id.headingDiv);
         itemsPanel = findViewById(R.id.itemsPanel);
         detailsPanel = findViewById(R.id.detailsPanel);
         searchBar = findViewById(R.id.searchBar);
+        movingRow = findViewById(R.id.movingRow);
         bottomSheet = new BottomSheet(this, findViewById(R.id.bottomSheet));
         buildBottomSheet();
+        setShareBotton();
         buildSearchBar();
-        show(Item.MAIN_ITEM);
-        i("log", Integer.toString(itemAdapter.getItemCount()));
+        buildMovingRow();
+        show(MAIN_ITEM);
+        movingItem = null;
+        movingConfirm = false;
+        Log.i("info", CustomizeItem.TABLES.toString());
     }
     @Override
     protected void onStart() {
@@ -76,14 +88,20 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        if (bottomSheet.behavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+        if (bottomSheet.behavior.getState() != BottomSheetBehavior.STATE_HIDDEN) { // collapse bottom sheet
             bottomSheet.behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        } else if (!parentItem.equals(Item.MAIN_ITEM)) {
+        } else if (!parentItem.equals(MAIN_ITEM)) { // show parent
             switch (parentItem.parentTable) {
                 case Item.TABLE_NAME:
-                    Log.d("show", Long.toString(parentItem.parentId));
+                    Log.d("show item", Long.toString(parentItem.parentId));
                     show(new Item(parentItem.parentId));
                     break;
+                case Task.TABLE_NAME:
+                    Log.d("show task", Long.toString(parentItem.parentId));
+                    show(new Task(parentItem.parentId));
+                default:
+                    Log.d("show custom item", parentItem.parentTable + "\t" + Long.toString(parentItem.parentId));
+                    show(new CustomizeItem(parentItem.parentTable, parentItem.parentId));
             }
         } else {
             if (backPressed) {
@@ -102,8 +120,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setShareBotton() {
-        View share = findViewById(R.id.share);
+        final View share = findViewById(R.id.share);
         //TODO allow user to eport or import database by .sql file
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popup = new PopupMenu(MainActivity.this, share, Gravity.RIGHT);
+                popup.getMenuInflater().inflate(R.menu.share_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.exportSql:
+                                DatabaseHelper.DatabaseHelper().exportSQL(MainActivity.this.getPackageName());
+                                return true;
+                            case R.id.importSql:
+                                DatabaseHelper.DatabaseHelper().loadSQL(MainActivity.this.getPackageName());
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                popup.show();
+            }
+        });
     }
     private void updateHeading() {
         if (parentItem.getTable().equals(Item.TABLE_NAME)) {
@@ -119,8 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private void buildBottomSheet() {
         bottomSheet.behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        floatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // open bottom sheet
@@ -134,31 +174,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        hideKeyBoard();
     }
     private void buildSearchBar() {
         final TextView queryTextView = searchBar.findViewById(R.id.queryTextView);
-        queryTextView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                //TODO search all item by text
-                Toast.makeText(MainActivity.this, editable.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-        ImageView close = searchBar.findViewById(R.id.close);
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                queryTextView.setText("");
-            }
-        });
         findViewById(R.id.search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,10 +186,44 @@ public class MainActivity extends AppCompatActivity {
                         hideKeyBoard();
                     }
                     searchBar.setVisibility(View.GONE);
+                    updateHeading();
+                    show(parentItem);
                 } else {
                     searchBar.setVisibility(View.VISIBLE);
                     searchBar.requestFocus();
                 }
+            }
+        });
+        findViewById(R.id.confirmSearch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO start search by the content when button click
+                headingTable.setVisibility(View.GONE);
+                headingDiv.setVisibility(View.GONE);
+                heading.setText("Search Result");
+                if (queryTextView.getText().toString().equals("")) {
+                    reloadItemsPanel(new ArrayList<AbstractItem>());
+                    return;
+                } else {
+                    reloadItemsPanel(db.search(queryTextView.getText().toString()));
+                    hideKeyBoard();
+                }
+            }
+        });
+    }
+    private void buildMovingRow() {
+        findViewById(R.id.confirmMove).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                movingConfirm = true;
+                moveMode(null);
+            }
+        });
+        findViewById(R.id.cancelMove).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                movingConfirm = false;
+                moveMode(null);
             }
         });
     }
@@ -184,9 +237,13 @@ public class MainActivity extends AppCompatActivity {
         detailsPanel.removeAllViews();
         if(parent.getTable().equals(Task.TABLE_NAME)) {
             Task t = (Task) parentItem;
-            detailsPanelAddRow(Task.COL_DETAILS, t.details);
+            detailsPanelAddRow(Task.COL_DETAILS, t.getDetails());
         } else if (! parent.getTable().equals(Item.TABLE_NAME)) {
             // TODO show the extra fields ot customer item
+            CustomizeItem c = (CustomizeItem) parentItem;
+            for (String key : CustomizeItem.TABLES.get(c.getTable())) {
+                detailsPanelAddRow(key, c.getValues(key));
+            }
         }
     }
     private void detailsPanelAddRow(String fieldStr, String contentStr) {
@@ -218,6 +275,53 @@ public class MainActivity extends AppCompatActivity {
         itemAdapter = new AbstraceItemAdapter(AbstractItem.getChildren(parentItem.getTable(), parentItem.getId()));
         itemsPanel.setAdapter(itemAdapter);
         itemsPanel.setLayoutManager(new LinearLayoutManager(this));
+    }
+    public void reloadItemsPanel(ArrayList<AbstractItem> items) {
+        itemAdapter = new AbstraceItemAdapter(items);
+        itemsPanel.setAdapter(itemAdapter);
+        itemsPanel.setLayoutManager(new LinearLayoutManager(this));
+    }
+    public void moveMode(AbstractItem item) {
+        if (movingItem == null) {
+            //TODO start moving mode
+            movingItem = item;
+            // set the moving row to be visible
+            movingRow.setVisibility(View.VISIBLE);
+            // disable the floating button
+            floatButton.setVisibility(View.GONE);
+            // add a bottom row for tick and cross to cancel the moving and confirm moving (like Moving | tick | cross)
+        } else {
+            //TODO end moving mode
+            Log.i("moving confirm", Boolean.toString(movingConfirm));
+            if (movingConfirm) {
+                // move item to current place
+                movingItem.parentTable = parentItem.getTable();
+                movingItem.parentId = parentItem.getId();
+                movingItem.update();
+                // update item panel
+                reloadItemsPanel();
+            } else {
+                // if cross is selected, jump to moving item parent
+                Log.i("info", "cancel");
+                switch (movingItem.parentTable) {
+                    case Item.TABLE_NAME:
+                        Log.d("show item", Long.toString(parentItem.parentId));
+                        show(new Item(parentItem.parentId));
+                        break;
+                    case Task.TABLE_NAME:
+                        Log.d("show task", Long.toString(parentItem.parentId));
+                        show(new Task(parentItem.parentId));
+                    default:
+                        Log.d("show custom item", parentItem.parentTable + "\t" + Long.toString(parentItem.parentId));
+                        show(new CustomizeItem(parentItem.parentTable, parentItem.parentId));
+                }
+            }
+            // enable floating button
+            movingRow.setVisibility(View.GONE);
+            floatButton.setVisibility(View.VISIBLE);
+            movingItem = null;
+        }
+        Log.i("info", Boolean.toString(movingItem == null));
     }
     public void hideKeyBoard() {
         View view = this.getCurrentFocus();

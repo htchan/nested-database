@@ -1,17 +1,10 @@
-package com.htchan.marking.model;
+package com.htchan.marking.baseModel;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class Item extends AbstractItem{
     public static final String TABLE_NAME = "item";
-    public static Item MAIN_ITEM = new Item(0);
     public Item(long id) {
         fromCursor(DatabaseHelper.DatabaseHelper().getCursorById(TABLE_NAME, id));
         this.table = TABLE_NAME;
@@ -21,11 +14,11 @@ public class Item extends AbstractItem{
     }
     @Override
     public void save() {
-        id = DatabaseHelper.DatabaseHelper().saveRecord(Item.TABLE_NAME, toValues());
+        id = DatabaseHelper.DatabaseHelper().saveRecord(Item.TABLE_NAME, this);
     }
     @Override
     public void update() {
-        DatabaseHelper.DatabaseHelper().updateRecord(Item.TABLE_NAME, toValues());
+        DatabaseHelper.DatabaseHelper().updateRecord(Item.TABLE_NAME, this);
     }
     @Override
     public void delete() {
@@ -34,11 +27,11 @@ public class Item extends AbstractItem{
             child.parentId = parentId;
             child.update();
         }
-        DatabaseHelper.DatabaseHelper().delete(Item.TABLE_NAME, id);
+        DatabaseHelper.DatabaseHelper().delete(Item.TABLE_NAME, this);
     }
     @Override
     public void deleteChild() {
-        DatabaseHelper.DatabaseHelper().deleteChild(Item.TABLE_NAME, id);
+        DatabaseHelper.DatabaseHelper().deleteChild(Item.TABLE_NAME, this);
     }
     @Override
     public void fromCursor(Cursor cursor) {
@@ -50,7 +43,15 @@ public class Item extends AbstractItem{
     }
     @Override
     public String toString() {
-        return "Table: " + Item.TABLE_NAME + "\nID: " + id + "\nTitle: " + title;
+        String output = super.toString();
+        if (output.equals("encode error")) {
+            return output;
+        }
+        try{
+            return "table=" + encode(TABLE_NAME) + "&" +output;
+        } catch (Exception e) {
+            return "encode error";
+        }
     }
     @Override
     public boolean equals(Object obj) {

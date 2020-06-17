@@ -10,4 +10,30 @@
     app:behavior_peekHeight="64dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+    <EditText
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:hint="Title"
+        android:inputType="textMultiLine|textPersonName"
+        android:paddingLeft="10sp"
+        android:paddingTop="7sp"
+        android:paddingRight="10sp"
+        android:paddingBottom="7sp"
+        android:textColor="@android:color/background_light"
+        android:textColorHint="@android:color/background_light" />
+
+    <LinearLayout
+        android:id="@+id/extraRows"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingLeft="5sp"
+        android:paddingTop="3sp"
+        android:paddingRight="5sp"
+        android:paddingBottom="3sp"></LinearLayout>
+
 </LinearLayout>

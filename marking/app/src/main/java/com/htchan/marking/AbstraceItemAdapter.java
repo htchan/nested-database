@@ -1,18 +1,15 @@
 package com.htchan.marking;
 
-import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
-import com.htchan.marking.model.AbstractItem;
-import com.htchan.marking.model.Task;
+import com.htchan.marking.baseModel.AbstractItem;
+import com.htchan.marking.baseModel.Item;
+import com.htchan.marking.baseModel.Task;
 import com.htchan.marking.ui.AbstractItemView;
 
 import java.util.ArrayList;
@@ -23,9 +20,6 @@ public class AbstraceItemAdapter extends Adapter {
         public AbstractViewHolder(AbstractItemView abstractItemView) {
             super(abstractItemView);
             this.abstractItemView = abstractItemView;
-        }
-        public View getView(int id) {
-            return abstractItemView.findViewById(id);
         }
     }
 
@@ -45,11 +39,10 @@ public class AbstraceItemAdapter extends Adapter {
         viewHolder.abstractItemView.setItem(item);
         switch (items.get(position).getTable()) {
             case Task.TABLE_NAME:
-                viewHolder.abstractItemView.setLayout(R.layout.task_view);
-                ((TextView) viewHolder.getView(R.id.title)).setText(item.title);
-                CheckBox checkbox = (CheckBox) viewHolder.getView(R.id.checked);
-                checkbox.setChecked(((Task) item).checked);
-                checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                viewHolder.abstractItemView.setLayout(Task.TABLE_NAME);
+                viewHolder.abstractItemView.textView.setText(item.getTitle());
+                viewHolder.abstractItemView.checkbox.setChecked(((Task) item).checked);
+                viewHolder.abstractItemView.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                         Task t = (Task) viewHolder.abstractItemView.getItem();
@@ -59,8 +52,8 @@ public class AbstraceItemAdapter extends Adapter {
                 });
                 break;
             default:
-                viewHolder.abstractItemView.setLayout(R.layout.item_view);
-                ((TextView) viewHolder.getView(R.id.title)).setText(item.title);
+                viewHolder.abstractItemView.setLayout(Item.TABLE_NAME);
+                viewHolder.abstractItemView.textView.setText(item.getTitle());
         }
         viewHolder.abstractItemView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
                 RecyclerView.LayoutParams.WRAP_CONTENT));

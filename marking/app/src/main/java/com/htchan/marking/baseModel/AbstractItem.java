@@ -1,13 +1,13 @@
-package com.htchan.marking.model;
+package com.htchan.marking.baseModel;
 
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.util.Log;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public abstract class AbstractItem {
     public static final String COL_ID = "id";
@@ -32,16 +32,22 @@ public abstract class AbstractItem {
         this.parentId = parentId;
     }
 
-    public long getId() {return id;}
-    public String getTable() {return table;}
+    public long getId() {
+        return id;
+    }
+    public String getTable() {
+        return table;
+    }
+    public String getTitle() {
+        return title.replace("\\n", "\n");
+    }
     public static ArrayList<AbstractItem> getChildren(String table, long id) {
         ArrayList<AbstractItem> children = new ArrayList<>();
-        //TODO extract the children by id
+        // extract the children by id
         DatabaseHelper db = DatabaseHelper.DatabaseHelper();
         Iterator<String> i = db.getTables().iterator();
         while (i.hasNext()) {
             String searchTable = i.next();
-            Log.i("table", searchTable);
             Cursor cursor = db.getCursorByParent(searchTable, table, id);
             if(cursor.moveToFirst()) {
                 do {
@@ -61,8 +67,36 @@ public abstract class AbstractItem {
         }
         return children;
     }
+    protected String encode(String input) throws java.io.UnsupportedEncodingException {
+        return URLEncoder.encode(input, "UTF-8");
+    }
+    protected String decode(String input) throws java.io.UnsupportedEncodingException {
+        return URLDecoder.decode(input, "UTF-8");
+    }
+    public static ContentValues fromString(String str) {
+        if (str.equals("encode error")) {
+            return null;
+        } else {
+            //todo change the URL encoded string to content value
+            ContentValues values = new ContentValues();
+            return values;
+        }
+    }
+    @Override
+    public String toString() {
+        try {
+            return COL_ID + "=" + encode(Long.toString(id)) + "&" +
+                    COL_PARENT_TABLE + "=" + encode(parentTable) + "&" +
+                    COL_PARENT_ID + "=" + encode(Long.toString(parentId)) + "&" +
+                    COL_TITLE + "=" + encode(title);
+        } catch (Exception e) {
+            return "encode error";
+        }
+    }
     public void fromCursor(Cursor cursor) {
-        cursor.moveToFirst();
+        if (cursor.getPosition() < 0) {
+            cursor.moveToFirst();
+        }
         id = cursor.getLong(cursor.getColumnIndex(COL_ID));
         title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
         parentTable = cursor.getString(cursor.getColumnIndex(COL_PARENT_TABLE));

@@ -1,7 +1,6 @@
 package com.htchan.marking.ui.bottomsheet;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -9,18 +8,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.htchan.marking.MainActivity;
 import com.htchan.marking.R;
-import com.htchan.marking.model.AbstractItem;
-import com.htchan.marking.model.DatabaseHelper;
-import com.htchan.marking.model.Item;
-import com.htchan.marking.model.Task;
+import com.htchan.marking.baseModel.AbstractItem;
+import com.htchan.marking.baseModel.CustomizeItem;
+import com.htchan.marking.baseModel.DatabaseHelper;
+import com.htchan.marking.baseModel.Item;
+import com.htchan.marking.baseModel.Task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BottomSheet {
@@ -50,11 +50,11 @@ public class BottomSheet {
         for(String table : DatabaseHelper.DatabaseHelper().getTables()) {
             tables.add(table);
             if(table.equals(Item.TABLE_NAME)) {
-                layouts.put(tables.get(tables.size() - 1), new ItemBottomSheet(context));
+                layouts.put(table, new ItemBottomSheet(context));
             } else if (table.equals(Task.TABLE_NAME)) {
-                layouts.put(tables.get(tables.size() - 1), new TaskBottomSheet(context));
+                layouts.put(table, new TaskBottomSheet(context));
             } else {
-                layouts.put(tables.get(tables.size() - 1), new CustomizeBottomSheet(context, table));
+                layouts.put(table, new CustomizeBottomSheet(context, table));
             }
         }
         currentLayout = 1;
@@ -62,7 +62,6 @@ public class BottomSheet {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO add the value to the table
                 if(layouts.get(tables.get(currentLayout)).valid()) {
                     switch (mode) {
                         case ADD:
@@ -101,10 +100,23 @@ public class BottomSheet {
         if (! tables.get(currentLayout).equals("New Table")) {
             layouts.get(tables.get(currentLayout)).toItem().save();
             layouts.get(tables.get(currentLayout)).clear();
-            Toast.makeText(context, "Item added successfully", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Item added successfully", Toast.LENGTH_SHORT).show();
             MainActivity.mainActivity.reloadItemsPanel();
         } else {
-            //TODO aprocess user input to create new table (it not exist)
+            String tableName = ((NewTableBottomSheet)layouts.get(tables.get(currentLayout))).tableName.getText().toString();
+            List<String> fields = ((NewTableBottomSheet) layouts.get(tables.get(currentLayout))).getFields();
+            List<String> types = new ArrayList<String>(Arrays.asList("LONG", "TEXT", "TEXT", "LONG"));
+            for (int i = types.size(); i < fields.size(); ++i) {
+                types.add("TEXT");
+            }
+            String sql = DatabaseHelper.DatabaseHelper().createTableStatement(tableName,
+                    fields, types);
+            DatabaseHelper.DatabaseHelper().saveTable(sql);
+            CustomizeItem.TABLES.put(tableName, fields.subList(4, fields.size()));
+            Log.i("info", CustomizeItem.TABLES.get(tableName).toString());
+            tables.add(tableName);
+            layouts.put(tableName, new CustomizeBottomSheet(context, tableName));
+            Toast.makeText(context, "Table added successfully", Toast.LENGTH_LONG).show();
         }
     }
     private void save() {

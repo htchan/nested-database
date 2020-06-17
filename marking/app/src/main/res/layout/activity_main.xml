@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,8 +41,10 @@
                 android:layout_weight="8"
                 android:background="@android:color/background_dark"
                 android:inputType="textMultiLine"
+                android:maxLines="3"
                 android:paddingStart="3sp"
                 android:paddingEnd="10sp"
+                android:scrollbars="vertical"
                 android:text="Heading"
                 android:textColor="@android:color/background_light"
                 android:textSize="40sp" />
@@ -78,13 +81,6 @@
             android:orientation="horizontal"
             android:visibility="gone">
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:tint="@android:color/background_light"
-                app:srcCompat="@android:drawable/ic_search_category_default" />
-
             <EditText
                 android:id="@+id/queryTextView"
                 android:layout_width="0dp"
@@ -98,11 +94,48 @@
                 android:textSize="20sp" />
 
             <ImageView
-                android:id="@+id/close"
+                android:id="@+id/confirmSearch"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+                android:tint="@android:color/background_light"
+                app:srcCompat="@android:drawable/ic_search_category_default" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/movingRow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/background_dark"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/confirmMove"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/holo_green_light"
+                android:text="Confirm"
+                android:textColor="@color/design_default_color_on_secondary" />
+
+            <Button
+                android:id="@+id/cancelMove"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:text="Cancel"
+                android:textColor="@color/cardview_light_background" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Moving"
+                android:textColor="@color/cardview_light_background"
+                android:textSize="30sp" />
+
         </LinearLayout>
 
         <View

@@ -4,27 +4,33 @@ import android.content.Context;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.htchan.marking.MainActivity;
 import com.htchan.marking.R;
-import com.htchan.marking.model.AbstractItem;
-import com.htchan.marking.ui.bottomsheet.AbstractBottomSheetLayout;
+import com.htchan.marking.baseModel.AbstractItem;
+import com.htchan.marking.baseModel.Task;
 import com.htchan.marking.ui.bottomsheet.BottomSheet;
 
 public class AbstractItemView extends LinearLayout {
     private Context context;
     private AbstractItem abstractItem;
+    public CheckBox checkbox;
+    public TextView textView;
     public AbstractItemView(final Context context) {
         super(context);
+        inflate(context, R.layout.abstract_view, this);
         this.context = context;
+        this.checkbox = findViewById(R.id.checked);
+        this.textView = findViewById(R.id.title);
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO allow main activity go inside when clicked
                 MainActivity.mainActivity.show(abstractItem);
             }
         });
@@ -45,15 +51,16 @@ public class AbstractItemView extends LinearLayout {
                                 return true;
                             case R.id.move:
                                 //TODO allow user to move item
+                                MainActivity.mainActivity.moveMode(abstractItem);
                                 return true;
                             case R.id.delete:
-                                //TODO make a popup to confirm delete the item or not
+                                // make a popup to confirm delete the item or not
                                 abstractItem.delete();
                                 MainActivity.mainActivity.reloadItemsPanel();
                                 Toast.makeText(context, "Delete " + abstractItem.title, Toast.LENGTH_SHORT).show();
                                 return true;
                             case R.id.deleteChild:
-                                //TODO make a popup to confirm delete the item or not
+                                // make a popup to confirm delete the item or not
                                 abstractItem.deleteChild();
                                 MainActivity.mainActivity.reloadItemsPanel();
                                 Toast.makeText(context, "Delete " + abstractItem.title + "with children", Toast.LENGTH_SHORT).show();
@@ -74,7 +81,11 @@ public class AbstractItemView extends LinearLayout {
     public AbstractItem getItem() {
         return abstractItem;
     }
-    public void setLayout(int layout) {
-        View.inflate(context, layout, this);
+    public void setLayout(String tableName) {
+        if (tableName.equals(Task.TABLE_NAME)) {
+            checkbox.setVisibility(VISIBLE);
+        } else {
+            checkbox.setVisibility(GONE);
+        }
     }
 }
