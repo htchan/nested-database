@@ -7,13 +7,15 @@ import '../repostories/item_repostory.dart';
 class ItemCard extends StatefulWidget {
   final bool enabled;
   Item item;
-  final Function reloadPage;
-  final Function(Item) move, setParentItem;
+  final Function reloadPage, removeEditingItem;
+  final Function(Item) move, setParentItem, setEditingItem;
   ItemCard({
     Key? key,
     required this.item,
     required this.reloadPage,
     required this.move,
+    required this.setEditingItem,
+    required this.removeEditingItem,
     required this.setParentItem,
     this.enabled = true,
   }) : super(key: key);
@@ -36,9 +38,11 @@ class _ItemCardState extends State<ItemCard> {
         setParentItem: widget.setParentItem,
       );
     } else if (editable) {
+      widget.setEditingItem(widget.item);
       return EditableItemCard(
         item: widget.item,
         save: (Item item) {
+          widget.removeEditingItem();
           ItemRepostory.instance().update(item)
           .then( (value) {
             if (value != 0) {
@@ -53,7 +57,10 @@ class _ItemCardState extends State<ItemCard> {
             }
           });
         },
-        cancel: () => setState( () => editable = false ),
+        cancel: () => setState( () {
+          editable = false;
+          widget.removeEditingItem();
+        } ),
       );
     } else {
       return BasicItemCard(
@@ -178,7 +185,10 @@ class EditableItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Slidable(
       child: ListTile(
-        title: TextField(controller: contentController,),
+        title: TextField(
+          controller: contentController,
+          maxLines: null,
+        ),
         trailing: IconButton(
           icon: const Icon(Icons.save),
           onPressed: () {

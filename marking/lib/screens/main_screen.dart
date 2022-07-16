@@ -22,15 +22,27 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  GlobalKey key = GlobalKey();
   Item parentItem;
   Item? movingItem;
+  int editingItemsCount = 0;
   List<Item> children = [];
 
   _MainScreenState(this.parentItem) {
     loadChildren();
   }
 
+  bool checkEditingItem() {
+    if (editingItemsCount > 0) {
+      ScaffoldMessenger.of(key.currentContext!).showSnackBar(
+        const SnackBar(content: Text("Item is in editing"))
+      );
+    }
+    return editingItemsCount > 0;
+  }
+
   Future<bool> onWillPop() async {
+    if (checkEditingItem()) return false;
     Item? item = await ItemRepostory.instance().getParent(parentItem);
     if (item == null) {
       return true;
@@ -46,6 +58,13 @@ class _MainScreenState extends State<MainScreen> {
       if (movingItem != null) results.remove(movingItem);
       children = results;
     }));
+  }
+
+  void setEditingItem(Item item) {
+    editingItemsCount += 1;
+  }
+  void removeEditingItem() {
+    editingItemsCount -= 1;
   }
 
   void setParentItem(Item item) {
@@ -74,11 +93,11 @@ class _MainScreenState extends State<MainScreen> {
           movingItem = null;
           loadChildren();
         });
-        ScaffoldMessenger.of(GlobalKey().currentContext!).showSnackBar(
+        ScaffoldMessenger.of(key.currentContext!).showSnackBar(
           const SnackBar(content: Text("Move item succeed"))
         );
       } else {
-        ScaffoldMessenger.of(GlobalKey().currentContext!).showSnackBar(
+        ScaffoldMessenger.of(key.currentContext!).showSnackBar(
           const SnackBar(content: Text("failed to update moving item"))
         );
       }
@@ -91,6 +110,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void showInsertItemBottomList(BuildContext context) {
+    if (checkEditingItem()) return;
     showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
@@ -116,6 +136,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
+      key: key,
       onWillPop: onWillPop,
       child: Scaffold(
         appBar: AppBar(
@@ -160,6 +181,8 @@ class _MainScreenState extends State<MainScreen> {
                   item: children[index],
                   reloadPage: loadChildren,
                   move: setMovingItem,
+                  setEditingItem: setEditingItem,
+                  removeEditingItem: removeEditingItem,
                   setParentItem: setParentItem,
                 ),
               ),
